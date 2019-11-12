@@ -3,112 +3,124 @@
 <title>Conway's Game of life</title>
 <script type="text/javascript">
 
+var squareLength = 25;
+
 function GameOfLife ()
 {
-  this.initEmpty = function (width,height) {
+	//Creates an empty grid
+	this.initEmpty = function (width,height) 
+	{
 		this.board = new Array(height);
 		for (var x = 0; x < height; x++)
-    {
+		{
 			this.board[x] = new Array(width);
 			for (var y = 0; y < width; y++)
-      {
+			{
 				this.board[x][y] = 0;
 			}
 		}
 	}
 
-  this.initRnd = function (width,height) {
-    this.board = new Array(height);
-      for (var x = 0; x < height; x++)
-      {
-        this.board[x] = new Array(width);
-        for (var y = 0; y < width; y++)
-        {
-          this.board[x][y] = Math.round(Math.random());
-        }
-      }
-    }
-  //Calculate the next generation
+	//Fill the matrix with a random assortment of 1s and 0s (Alive or dead)
+	this.initRnd = function (width,height) 
+	{
+		this.board = new Array(height);
+		for (var x = 0; x < height; x++)
+		{
+			this.board[x] = new Array(width);
+			for (var y = 0; y < width; y++)
+			{
+				this.board[x][y] = Math.round(Math.random());
+			}
+		}
+	}
+	
+	//Calculate the next generation
 	this.nextGen = function()
-  {
-    //Creates a new array with the size of the board as the row
+	{
+		//Creates a new array with the size of the board as the row
 		this.boardNext = new Array(this.board.length);
 
-    //A 2D matrix is created by adding columns
+		//A 2D matrix is created by adding columns
 		for (var i = 0; i < this.board.length; i++)
-    {
-      //this.boardNext = row
-      //this.boardNext[i] = column
+		{
+		//this.boardNext = row
+		//this.boardNext[i] = column
 			this.boardNext[i] = new Array(this.board[i].length);
 		}
 
 		for (var x = 0; x < this.board.length; x++)
-    {
+		{
 			for (var y = 0; y < this.board[x].length; y++)
-      {
+			{		
+				//n = neightbours
 				var n = 0;
+				
 				for (var dx = -1; dx <= 1; dx++)
-        {
+				{
 					for (var dy = -1; dy <= 1; dy++)
-          {
-            //Skip if on current block
+					{
+						//Skip if on current block
 						if (dx == 0 && dy == 0){}
 						else if (typeof this.board[x+dx] !== 'undefined' && typeof this.board[x+dx][y+dy] !== 'undefined'	&& this.board[x+dx][y+dy])
-            {
-              //Checks all 8 blocks around the current block. If the block is within bounds and is alive, 'n' is incremented
-              //loops until all 8 surrounding blocks are checked
+						{
+						//Checks all 8 blocks around the current block. If the block is within bounds and is alive, 'n' is incremented
+						//loops until all 8 surrounding blocks are checked
 							n++;
 						}
 					}
 				}
+				
 				var currentBlock = this.board[x][y];
 
-        if (n == 0 || n == 1)
-        {//if 0 or 1 neighbour, the block dies
-          currentBlock = 0;
-        }
-        else if (n == 2)
-        {}//if 2 neighbours, the state doesn't change
-        else if (n == 3)
-        {//if 3 neighbours, the block is alive
-          currentBlock = 1;
-        }
-        else
-        {//block dies in any other circumstance
-          currentBlock = 0;
-        }
-        //Value of next block state is assigned to the matrix
+				if (n == 0 || n == 1)
+				{//if 0 or 1 neighbour, the block dies
+					currentBlock = 0;
+				}
+				else if (n == 2)
+				{}//if 2 neighbours, the state doesn't change
+				else if (n == 3)
+				{//if 3 neighbours, the block is alive
+					currentBlock = 1;
+				}
+				else
+				{//block dies in any other circumstance
+					currentBlock = 0;
+				}
+				//Value of next block state is assigned to the matrix
 				this.boardNext[x][y] = currentBlock;
 			}
-		}
-    //Assigns the new matrix to be the current matrix
+		}		
+		//Assigns the new matrix to be the current matrix
 		this.board = this.boardNext;
 	}
 
-  //function used for printing out the grid
+	//function used for printing out the grid
 	this.print = function(ctx,w,h)
-  {
-    //iterates through the rows and then the columns of the matrix
+	{
+		//iterates through the rows and then the columns of the matrix
 		for (var x = 0; x < this.board.length; x++)
-    {//x and y must be reversed to align with what you see on the grid
+		{//x and y must be reversed to align with what you see on the grid
 			for (var y = 0; y < this.board[x].length; y++)
-      {
-        //Checks if the current block is even valid (must be 1)
+			{
+				//Checks if the current block is even valid (must be 1)
 				if (this.board[x][y])
-        {
+				{
 					ctx.fillStyle = "orange";
-        }//if not 1 then make it dead (white)
-        else
-        {
+				}//if not 1 then make it dead (white)
+				else
+				{
 					ctx.fillStyle = "white";
-          //Creates the grid lines
-          ctx.lineWidth = 2;
-          ctx.strokeStyle = "black";
-        }
-        //Sets the black grid
+					//Creates the grid lines
+					ctx.lineWidth = 2;
+					ctx.strokeStyle = "black";
+				}
+				
+				//Sets the black grid
 				ctx.strokeRect(y*h,x*w,h,w);
-        //Fills in the square to be either orange(alive) or white(dead)
-        ctx.fillRect(y*h,x*w,h,w);
+        
+				//Fills in the square to be either orange(alive) or white(dead)
+				ctx.fillRect(y*h,x*w,h,w);
 			}
 		}
 	}
@@ -119,83 +131,108 @@ function init()
 	// Change document title and text under canvas
 	document.title = "Conway's Game of Life";
 
-  //creates a new GameOfLife object
+	//creates a new GameOfLife object
 	var canvas = new GameOfLife();
 
-  //1 if start is active, 0 if not
-  var startActive = 0;
-  var set;
-  var gridRows = 64;
-  var gridCol = 64;
-
-  document.getElementById("canvas").width = 400;
-  document.getElementById("canvas").height = 400;
+	//1 if start is active, 0 if not
+	var startActive = 0;
+	var set;
+	var width = document.getElementById("canvas").width;
+	var height = document.getElementById("canvas").height
+	var gridRows = Math.round(width/squareLength);
+	var gridCol = Math.round(height/squareLength);
+	
+	//Generates an initial matrix of 0s only
 	canvas.initEmpty(gridRows,gridCol);
 
 	// Get canvas contexts or return 1
 	canvas.canvas = document.getElementById('canvas');
 	canvas.ctx = canvas.canvas.getContext('2d');
-  canvas.print(canvas.ctx,25,25);
+	canvas.print(canvas.ctx,squareLength,squareLength);
 
-  canvas.canvas.addEventListener("mousedown", function(e)
-  {
-    getMousePosition(canvas, e);
-  });
-
-  step.addEventListener("click", function(e)
-  {
-    run(canvas,canvas.ctx,25,25)
-  });
-
-  start.addEventListener("click", function(e)
-  {
-    if (startActive == 0)
-    {
-      set = setInterval(function(){run(canvas,canvas.ctx,25,25);},250);
-      document.getElementById("start").innerHTML = "Stop";
-    }
-    else {
-      clearInterval(set);
-      document.getElementById("start").innerHTML = "Start";
-    }
-
-    startActive ^= 1;
-  });
-
-  random.addEventListener("click", function(e)
-  {
-    canvas.initRnd(gridRows,gridCol);
-    canvas.print(canvas.ctx,25,25);
-  })
+	//listens for if the cavas has been clicked on
+	canvas.canvas.addEventListener("mousedown", function(e)
+	{
+		getMousePosition(canvas, e);
+	});
+	
+	//If 'step' is clicked then run() is called to show the next iteration of GoL
+	step.addEventListener("click", function(e)
+	{
+		run(canvas,canvas.ctx,squareLength,squareLength)
+	});
+	
+	//If 'start' is clicked then run() is called every 250 milliseconds or it is stopped
+	start.addEventListener("click", function(e)
+	{	
+		//if 'start' is not yet active then activate it
+		if (startActive == 0)
+		{	//setInterval will call run() every 250 milliseconds
+			set = setInterval(function(){run(canvas,canvas.ctx,squareLength,squareLength);},250);
+			
+			//button text is changed to "stop"
+			document.getElementById("start").innerHTML = "Stop";
+		}
+		else { //if setInterval is already running then clear it
+		clearInterval(set);
+		
+		//Changes button text to "start"
+		document.getElementById("start").innerHTML = "Start";
+		}
+	
+		//Changes state of startActive from 1 -> 0 or 0 -> 1
+		startActive ^= 1;
+	});
+	
+	//if 'random' button is clicked then randomly initialise the canvas and print
+	random.addEventListener("click", function(e)
+	{
+		canvas.initRnd(gridRows,gridCol);
+		canvas.print(canvas.ctx,squareLength,squareLength);
+	})
+	
+	//if "clear" button is clicked then re-initialise the canvas but with just 0s in the matrix
+	clear.addEventListener("click", function(e)
+	{
+		canvas.initEmpty(gridRows,gridCol);
+		canvas.print(canvas.ctx,squareLength,squareLength);
+	});
 
 	return 0;
 }
 
+//Calls nextGen to calculate the next iteration of blocks and then prints them on the canvas
 function run(game,ctx,w,h) {
   game.nextGen()
   game.print(ctx,w,h);
-	return 0;
+  return 0;
 }
 
+//Called when the canvas is clicked on, gets the x and y coords on the canvas
+//and then passes these to 'determineXY()' to determine which blocks they equate to
 function getMousePosition(c, event)
 {
   let rect = c.canvas.getBoundingClientRect();
   let x = event.clientX - rect.left;
   let y = event.clientY - rect.top;
-
+  
   determineXY(c,x,y);
   console.log("Coordinate x: " + x,"Coordinate y: " + y);
 }
 
+//Determines which cell is selected
 function determineXY(c,x,y)
 {
   c.ctx = c.canvas.getContext('2d');
 
-  x = Math.ceil(x/(25)) - 1;
-  y = Math.ceil(y/(25)) - 1;
+  //canvas is split into 25x25 blocks so coords are divided by 25 each
+  //1 is subtracted due to blocks starting at [0,0]
+  x = Math.ceil(x/(squareLength)) - 1;
+  y = Math.ceil(y/(squareLength)) - 1;
   console.log("grid x: " + x,"grid y: " + y);
+  //replaces the current value of the block with the opposite value (1 -> 0 or 0 -> 1)
   c.board[y][x] ^= 1;
-  c.print(c.ctx,25,25);
+  c.print(c.ctx,squareLength,squareLength);
 }
 
 </script>
@@ -218,11 +255,10 @@ function determineXY(c,x,y)
 </head>
 
 <body onLoad="init();">
-	<canvas id="canvas" width="300" height="300">
-		Canvas not supported
-	</canvas>
-  <button id="step">Step</button>
-  <button id="start">Start</button>
-  <button id="random">Random</button>
+	<canvas id="canvas" height="500" width="700">Canvas not supported</canvas>
+	<button id="step">Step</button>
+	<button id="start">Start</button>
+	<button id="random">Random</button>
+	<button id="clear">Clear</button>
 </body>
 </html>
