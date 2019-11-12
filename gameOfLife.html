@@ -1,0 +1,228 @@
+<html>
+<head>
+<title>Conway's Game of life</title>
+<script type="text/javascript">
+
+function GameOfLife ()
+{
+  this.initEmpty = function (width,height) {
+		this.board = new Array(height);
+		for (var x = 0; x < height; x++)
+    {
+			this.board[x] = new Array(width);
+			for (var y = 0; y < width; y++)
+      {
+				this.board[x][y] = 0;
+			}
+		}
+	}
+
+  this.initRnd = function (width,height) {
+    this.board = new Array(height);
+      for (var x = 0; x < height; x++)
+      {
+        this.board[x] = new Array(width);
+        for (var y = 0; y < width; y++)
+        {
+          this.board[x][y] = Math.round(Math.random());
+        }
+      }
+    }
+  //Calculate the next generation
+	this.nextGen = function()
+  {
+    //Creates a new array with the size of the board as the row
+		this.boardNext = new Array(this.board.length);
+
+    //A 2D matrix is created by adding columns
+		for (var i = 0; i < this.board.length; i++)
+    {
+      //this.boardNext = row
+      //this.boardNext[i] = column
+			this.boardNext[i] = new Array(this.board[i].length);
+		}
+
+		for (var x = 0; x < this.board.length; x++)
+    {
+			for (var y = 0; y < this.board[x].length; y++)
+      {
+				var n = 0;
+				for (var dx = -1; dx <= 1; dx++)
+        {
+					for (var dy = -1; dy <= 1; dy++)
+          {
+            //Skip if on current block
+						if (dx == 0 && dy == 0){}
+						else if (typeof this.board[x+dx] !== 'undefined' && typeof this.board[x+dx][y+dy] !== 'undefined'	&& this.board[x+dx][y+dy])
+            {
+              //Checks all 8 blocks around the current block. If the block is within bounds and is alive, 'n' is incremented
+              //loops until all 8 surrounding blocks are checked
+							n++;
+						}
+					}
+				}
+				var currentBlock = this.board[x][y];
+
+        if (n == 0 || n == 1)
+        {//if 0 or 1 neighbour, the block dies
+          currentBlock = 0;
+        }
+        else if (n == 2)
+        {}//if 2 neighbours, the state doesn't change
+        else if (n == 3)
+        {//if 3 neighbours, the block is alive
+          currentBlock = 1;
+        }
+        else
+        {//block dies in any other circumstance
+          currentBlock = 0;
+        }
+        //Value of next block state is assigned to the matrix
+				this.boardNext[x][y] = currentBlock;
+			}
+		}
+    //Assigns the new matrix to be the current matrix
+		this.board = this.boardNext;
+	}
+
+  //function used for printing out the grid
+	this.print = function(ctx,w,h)
+  {
+    //iterates through the rows and then the columns of the matrix
+		for (var x = 0; x < this.board.length; x++)
+    {//x and y must be reversed to align with what you see on the grid
+			for (var y = 0; y < this.board[x].length; y++)
+      {
+        //Checks if the current block is even valid (must be 1)
+				if (this.board[x][y])
+        {
+					ctx.fillStyle = "orange";
+        }//if not 1 then make it dead (white)
+        else
+        {
+					ctx.fillStyle = "white";
+          //Creates the grid lines
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "black";
+        }
+        //Sets the black grid
+				ctx.strokeRect(y*h,x*w,h,w);
+        //Fills in the square to be either orange(alive) or white(dead)
+        ctx.fillRect(y*h,x*w,h,w);
+			}
+		}
+	}
+}
+
+function init()
+{
+	// Change document title and text under canvas
+	document.title = "Conway's Game of Life";
+
+  //creates a new GameOfLife object
+	var canvas = new GameOfLife();
+
+  //1 if start is active, 0 if not
+  var startActive = 0;
+  var set;
+  var gridRows = 64;
+  var gridCol = 64;
+
+  document.getElementById("canvas").width = 400;
+  document.getElementById("canvas").height = 400;
+	canvas.initEmpty(gridRows,gridCol);
+
+	// Get canvas contexts or return 1
+	canvas.canvas = document.getElementById('canvas');
+	canvas.ctx = canvas.canvas.getContext('2d');
+  canvas.print(canvas.ctx,25,25);
+
+  canvas.canvas.addEventListener("mousedown", function(e)
+  {
+    getMousePosition(canvas, e);
+  });
+
+  step.addEventListener("click", function(e)
+  {
+    run(canvas,canvas.ctx,25,25)
+  });
+
+  start.addEventListener("click", function(e)
+  {
+    if (startActive == 0)
+    {
+      set = setInterval(function(){run(canvas,canvas.ctx,25,25);},250);
+      document.getElementById("start").innerHTML = "Stop";
+    }
+    else {
+      clearInterval(set);
+      document.getElementById("start").innerHTML = "Start";
+    }
+
+    startActive ^= 1;
+  });
+
+  random.addEventListener("click", function(e)
+  {
+    canvas.initRnd(gridRows,gridCol);
+    canvas.print(canvas.ctx,25,25);
+  })
+
+	return 0;
+}
+
+function run(game,ctx,w,h) {
+  game.nextGen()
+  game.print(ctx,w,h);
+	return 0;
+}
+
+function getMousePosition(c, event)
+{
+  let rect = c.canvas.getBoundingClientRect();
+  let x = event.clientX - rect.left;
+  let y = event.clientY - rect.top;
+
+  determineXY(c,x,y);
+  console.log("Coordinate x: " + x,"Coordinate y: " + y);
+}
+
+function determineXY(c,x,y)
+{
+  c.ctx = c.canvas.getContext('2d');
+
+  x = Math.ceil(x/(25)) - 1;
+  y = Math.ceil(y/(25)) - 1;
+  console.log("grid x: " + x,"grid y: " + y);
+  c.board[y][x] ^= 1;
+  c.print(c.ctx,25,25);
+}
+
+</script>
+<style>
+  canvas {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    border: 3px solid #000000;
+  }
+
+  button {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 5px;
+    margin-top: 5px;
+  }
+</style>
+</head>
+
+<body onLoad="init();">
+	<canvas id="canvas" width="300" height="300">
+		Canvas not supported
+	</canvas>
+  <button id="step">Step</button>
+  <button id="start">Start</button>
+  <button id="random">Random</button>
+</body>
+</html>
